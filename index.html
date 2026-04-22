@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APEX MOTORSPORT — Gestion de Course</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ÉCRAN DE CHARGEMENT -->
+<div id="screen-loading" class="screen active">
+  <div class="loading-content">
+    <div class="logo-big">APEX<br><span>MOTORSPORT</span></div>
+    <div class="loading-bar-wrap"><div class="loading-bar" id="loadingBar"></div></div>
+    <p class="loading-text" id="loadingText">Initialisation du moteur...</p>
+  </div>
+</div>
+
+<!-- MENU PRINCIPAL -->
+<div id="screen-menu" class="screen">
+  <div class="menu-bg"></div>
+  <div class="menu-content">
+    <div class="logo-big">APEX<br><span>MOTORSPORT</span></div>
+    <div class="menu-subtitle">Gestion d'Équipe de Course</div>
+    <div class="menu-buttons">
+      <button class="btn-menu" id="btnNewGame">Nouvelle Partie</button>
+      <button class="btn-menu" id="btnContinue">Continuer</button>
+      <button class="btn-menu" id="btnCredits">Crédits</button>
+    </div>
+    <div class="menu-version">v1.0.0 — APEX MOTORSPORT</div>
+  </div>
+</div>
+
+<!-- CRÉATION D'ÉQUIPE -->
+<div id="screen-create" class="screen">
+  <div class="topbar">
+    <span class="topbar-title">CRÉER VOTRE ÉQUIPE</span>
+  </div>
+  <div class="create-container">
+    <div class="create-section">
+      <label>Nom de l'équipe</label>
+      <input type="text" id="teamName" placeholder="Ex: Scuderia Nova" maxlength="24" />
+    </div>
+    <div class="create-section">
+      <label>Couleur de l'équipe</label>
+      <div class="color-picker">
+        <div class="color-opt active" data-color="#e63946" style="background:#e63946"></div>
+        <div class="color-opt" data-color="#2196f3" style="background:#2196f3"></div>
+        <div class="color-opt" data-color="#4caf50" style="background:#4caf50"></div>
+        <div class="color-opt" data-color="#ff9800" style="background:#ff9800"></div>
+        <div class="color-opt" data-color="#9c27b0" style="background:#9c27b0"></div>
+        <div class="color-opt" data-color="#00bcd4" style="background:#00bcd4"></div>
+        <div class="color-opt" data-color="#f5f5f5" style="background:#f5f5f5"></div>
+        <div class="color-opt" data-color="#ffd700" style="background:#ffd700"></div>
+      </div>
+    </div>
+    <div class="create-section">
+      <label>Mode de jeu principal</label>
+      <div class="mode-select">
+        <div class="mode-card active" data-mode="mixed">
+          <div class="mode-icon">🏁</div>
+          <div class="mode-name">Multi-discipline</div>
+          <div class="mode-desc">Rallye, Drift, Vitesse & Endurance</div>
+        </div>
+        <div class="mode-card" data-mode="rally">
+          <div class="mode-icon">🌲</div>
+          <div class="mode-name">Spécialiste Rallye</div>
+          <div class="mode-desc">Bonus sur les courses de rallye</div>
+        </div>
+        <div class="mode-card" data-mode="drift">
+          <div class="mode-icon">💨</div>
+          <div class="mode-name">Spécialiste Drift</div>
+          <div class="mode-desc">Bonus sur les courses de drift</div>
+        </div>
+        <div class="mode-card" data-mode="endurance">
+          <div class="mode-icon">⏱️</div>
+          <div class="mode-name">Spécialiste Endurance</div>
+          <div class="mode-desc">Bonus sur les courses d'endurance</div>
+        </div>
+      </div>
+    </div>
+    <div class="create-section">
+      <label>Budget de départ</label>
+      <div class="difficulty-select">
+        <div class="diff-card active" data-diff="normal" data-budget="500000">
+          <div class="diff-name">Normal</div>
+          <div class="diff-budget">500 000 €</div>
+        </div>
+        <div class="diff-card" data-diff="hard" data-budget="250000">
+          <div class="diff-name">Difficile</div>
+          <div class="diff-budget">250 000 €</div>
+        </div>
+        <div class="diff-card" data-diff="easy" data-budget="1000000">
+          <div class="diff-name">Facile</div>
+          <div class="diff-budget">1 000 000 €</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" id="btnStartGame">LANCER LA PARTIE →</button>
+  </div>
+</div>
+
+<!-- JEU PRINCIPAL -->
+<div id="screen-game" class="screen">
+  <!-- BARRE DU HAUT -->
+  <div class="topbar game-topbar">
+    <div class="topbar-team">
+      <div class="team-color-dot" id="teamColorDot"></div>
+      <span class="topbar-teamname" id="topbarTeamName">Mon Équipe</span>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat-chip"><span class="chip-label">BUDGET</span><span class="chip-value" id="chipBudget">0 €</span></div>
+      <div class="stat-chip"><span class="chip-label">SAISON</span><span class="chip-value" id="chipSeason">1</span></div>
+      <div class="stat-chip"><span class="chip-label">POINTS</span><span class="chip-value" id="chipPoints">0</span></div>
+      <div class="stat-chip"><span class="chip-label">RÉPUTATION</span><span class="chip-value" id="chipRep">0%</span></div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="sidenav">
+    <div class="nav-item active" data-tab="garage">🚗 Garage</div>
+    <div class="nav-item" data-tab="drivers">👤 Pilotes</div>
+    <div class="nav-item" data-tab="mechanics">🔧 Mécaniciens</div>
+    <div class="nav-item" data-tab="races">🏁 Courses</div>
+    <div class="nav-item" data-tab="sponsors">💼 Sponsors</div>
+    <div class="nav-item" data-tab="stats">📊 Statistiques</div>
+  </div>
+
+  <!-- CONTENU PRINCIPAL -->
+  <div class="main-content">
+
+    <!-- GARAGE -->
+    <div class="tab-content active" id="tab-garage">
+      <div class="tab-header">
+        <h2>🚗 Garage — Vos Voitures</h2>
+        <button class="btn-secondary" id="btnBuyCar">+ Acheter une Voiture</button>
+      </div>
+      <div id="garageList" class="card-grid"></div>
+    </div>
+
+    <!-- PILOTES -->
+    <div class="tab-content" id="tab-drivers">
+      <div class="tab-header">
+        <h2>👤 Pilotes</h2>
+        <button class="btn-secondary" id="btnHireDriver">+ Recruter un Pilote</button>
+      </div>
+      <div id="driverList" class="card-grid"></div>
+    </div>
+
+    <!-- MÉCANICIENS -->
+    <div class="tab-content" id="tab-mechanics">
+      <div class="tab-header">
+        <h2>🔧 Mécaniciens</h2>
+        <button class="btn-secondary" id="btnHireMechanic">+ Recruter un Mécanicien</button>
+      </div>
+      <div id="mechanicList" class="card-grid"></div>
+    </div>
+
+    <!-- COURSES -->
+    <div class="tab-content" id="tab-races">
+      <div class="tab-header">
+        <h2>🏁 Calendrier des Courses</h2>
+      </div>
+      <div id="raceCalendar" class="race-list"></div>
+    </div>
+
+    <!-- SPONSORS -->
+    <div class="tab-content" id="tab-sponsors">
+      <div class="tab-header">
+        <h2>💼 Sponsors</h2>
+      </div>
+      <div id="sponsorList" class="card-grid"></div>
+    </div>
+
+    <!-- STATISTIQUES -->
+    <div class="tab-content" id="tab-stats">
+      <div class="tab-header">
+        <h2>📊 Statistiques de l'équipe</h2>
+      </div>
+      <div id="statsContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL GÉNÉRIQUE -->
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal" id="modalBox">
+    <div class="modal-header">
+      <span id="modalTitle">Titre</span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- MODAL COURSE EN COURS -->
+<div id="raceOverlay" class="modal-overlay hidden">
+  <div class="modal modal-race" id="raceModal">
+    <div class="race-header">
+      <div class="race-flag-anim" id="raceFlagAnim">🏁</div>
+      <div id="raceTitle" class="race-title">Course en cours...</div>
+    </div>
+    <div class="race-log" id="raceLog"></div>
+    <div class="race-result hidden" id="raceResult"></div>
+    <button class="btn-primary hidden" id="btnRaceClose">Fermer les résultats</button>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div id="toastContainer"></div>
+
+<script src="data.js"></script>
+<script src="game.js"></script>
+<script src="ui.js"></script>
+<script src="race.js"></script>
+<script src="main.js"></script>
+</body>
+  </html>
