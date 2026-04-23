@@ -11,7 +11,7 @@ const GAME = {
       teamName: teamName || "Mon Équipe",
       teamColor: teamColor || "#e63946",
       mode: mode || "mixed",
-      budget: budget || 500000,
+      budget: (budget !== undefined && budget !== null) ? budget : 500000,
       season: 1,
       points: 0,
       reputation: 0,
@@ -271,6 +271,99 @@ const GAME = {
 
     // Condition de la voiture (usure)
     const avgCond = Object.values(ownedCar.condition).reduce((a, b) => a + b, 0) / 4;
+    score *= (avgCond / 100);
+
+    // Bonus pilotes
+    const drivers = this.getAssignedDrivers(carUid);
+    if (drivers.length > 0) {
+      const drvScore = drivers.reduce((acc, d) => {
+        let ds = 0;
+        if (raceType === "rally")      ds = d.stats.speed * 0.3 + d.stats.consistency * 0.3 + d.stats.racecraft * 0.2 + d.stats.rain * 0.2;
+        else if (raceType === "drift") ds = d.stats.racecraft * 0.5 + d.stats.speed * 0.3 + d.stats.consistency * 0.2;
+        else if (raceType === "speed") ds = d.stats.speed * 0.45 + d.stats.racecraft * 0.35 + d.stats.consistency * 0.2;
+        else ds = d.stats.stamina * 0.4 + d.stats.consistency * 0.35 + d.stats.speed * 0.25;
+        // Bonus spécialité
+        if (d.specialties.includes(raceType)) ds *= 1.1;
+        return acc + ds;
+      }, 0) / drivers.length;
+      score += drvScore * 0.4;
+    } else {
+      score *= 0.5; // Pas de pilote = pénalité sévère
+    }
+
+    // Bonus mécaniciens
+    const mechanics = this.getAssignedMechanics(carUid);
+    if (mechanics.length > 0) {
+      const mecBonus = mechanics.reduce((acc, m) => acc + m.stats.skill, 0) / mechanics.length;
+      score += mecBonus * 0.1;
+    }
+
+    return Math.round(score);
+  },
+
+  // Calcule le risque d'accident
+  calcAccidentRisk(carUid, raceData) {
+    const ownedCar = this.getOwnedCar(carUid);
+    if (!ownedCar) return 50;
+    let risk = raceData.difficulty * 0.3;
+    const avgCond = Object.values(ownedCar.condition).reduce((a, b) => a + b, 0) / 4;
+    risk += (100 - avgCond) * 0.3;
+
+    const mechanics = this.getAssignedMechanics(carUid);
+    mechanics.forEach(m => { risk -= (m.bonus.accidentReduction || 0); });
+
+    const drivers = this.getAssignedDrivers(carUid);
+    drivers.forEach(d => { risk -= d.stats.consistency * 0.15; });
+
+    return Math.max(5, Math.min(80, risk));
+  },
+
+  // Salaires mensuels (fin de saison)
+  payWages() {
+    let total = 0;
+    this.state.drivers.forEach(d => {
+      const drv = DATA.drivers.find(x => x.id === d.driverId);
+      if (drv) total += drv.salary;
+    });
+    this.state.mechanics.forEach(m => {
+      const mec = DATA.mechanics.find(x => x.id === m.mechanicId);
+      if (mec) total += mec.salary;
+    });
+    this.state.budget -= total;
+    this.save();
+    return total;
+  },
+
+  // Nouvelle saison
+  newSeason() {
+    this.state.season++;
+    this.state.completedRaces = [];
+    DATA.races.forEach(r => { r.season = this.state.season; });
+    this.payWages();
+    this.save();
+  }
+};
+
+// ---- UTILITAIRE FORMATAGE ----
+function formatMoney(n) {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+}
+
+function stars(n) {
+  return "★".repeat(n) + "☆".repeat(5 - n);
+}
+
+function statColor(v) {
+  if (v >= 80) return "#4caf50";
+  if (v >= 60) return "#ff9800";
+  return "#f44336";
+}
+
+function condClass(v) {
+  if (v >= 70) return "cond-good";
+  if (v >= 40) return "cond-ok";
+  return "cond-bad";
+      } 4;
     score *= (avgCond / 100);
 
     // Bonus pilotes
